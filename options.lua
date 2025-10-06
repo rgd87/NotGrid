@@ -98,7 +98,7 @@ local DefaultOptions = {
 	["manathreshhold"] = 20,
 	["namelength"] = 3,
 
-	["ooralpha"] = 0.10,
+	["ooralpha"] = 0.8,
 
 	["useproximity"] = true,
 	["proximityrate"] = 1,
