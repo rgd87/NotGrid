@@ -4,7 +4,7 @@
 
 function NotGrid:CreateFrames()
 	self.Container = self:CreateContainerFrame()
-	for i=1,40 do 
+	for i=1,40 do
 		self.UnitFrames["raid"..i] = self:CreateUnitFrame("raid"..i,i)
 	end
 	for i=1,4 do
@@ -40,11 +40,11 @@ function NotGrid:CreateUnitFrame(unitid,raidindex)
 
 	-- Add background role icon
 	f.roleIcon = CreateFrame("Frame", nil, f)
-	f.roleIcon:SetWidth(20)
-	f.roleIcon:SetHeight(20)
+	f.roleIcon:SetWidth(16)
+	f.roleIcon:SetHeight(16)
 	f.roleIcon:SetPoint("TOPRIGHT", f, "TOPRIGHT", 5, 5)
 	f.roleIcon:SetFrameLevel(f:GetFrameLevel() + 3)
-	
+
 	-- -- Add black circular border texture
 	-- f.roleIcon.border = f.roleIcon:CreateTexture(nil, "BACKGROUND")
 	-- f.roleIcon.border:SetTexture("Interface\\AddOns\\NotGrid\\media\\tank2")
@@ -53,7 +53,7 @@ function NotGrid:CreateUnitFrame(unitid,raidindex)
 	-- f.roleIcon.border:SetHeight(22) -- 4 pixels larger than the icon
 	-- f.roleIcon.border:SetPoint("CENTER", f.roleIcon, "CENTER", 0, 0)
 	-- f.roleIcon.border:SetAlpha(0.65)
-	
+
 	f.roleIcon.texture = f.roleIcon:CreateTexture(nil, "OVERLAY")
 	f.roleIcon.texture:SetAllPoints()
 	f.roleIcon.texture:SetAlpha(0.85)
@@ -75,7 +75,7 @@ function NotGrid:CreateUnitFrame(unitid,raidindex)
 	f.incres.bgtex = f.incres:CreateTexture("$parentbgtex","BACKGROUND")
 
 	f.incheal = CreateFrame("Frame","$parenthealcommbar",f.healthbar) -- Was using a statusbar behind the health frame but when the frame's alpha is low this would be seen through it
-	
+
 	-- I was having problems with incheal covering up these fontstrings. My soluction is to parent them to the incheal, but set the relative point to the healthbar. And instead of hide/show the incheal I just lower/higher its color opacity
 	f.namehealthtext = f.incheal:CreateFontString("$parentnamehealthtext", "ARTWORK")
 	f.healcommtext = f.incheal:CreateFontString("$parenthealcommtext", "OVERLAY")
@@ -113,7 +113,7 @@ function NotGrid:CreateUnitFrame(unitid,raidindex)
 
 		UnitFrame_OnEnter() -- a blizzard function that handles the tooltip for the unit
 	end)
-	f:SetScript("OnLeave", function() 
+	f:SetScript("OnLeave", function()
 		UnitFrame_OnLeave() -- blizz function that handles tooltip for units
 	end)
 
@@ -184,33 +184,47 @@ function NotGrid:ConfigUnitFrames() -- this can get called on every setting chan
 		--f:SetAlpha(self.o.ooralpha) -- we set lastseen at frame creation instead. doing it like this makes config mode weird, and would obstruct disabling prox checking
 		local width, height
 		if o.showpowerbar and o.powerposition <= 2 then -- factor in a modifier for the powerbar width/height
-			width = o.unitwidth
-			height = o.unitheight+o.powersize+1
+			width = o.unitwidth+o.unitborder*2
+			height = o.unitheight+o.powersize+1+o.unitborder*2
 		elseif o.showpowerbar and o.powerposition >= 3 then
-			width = o.unitwidth+o.powersize+1
-			height = o.unitheight
+			width = o.unitwidth+o.powersize+1+o.unitborder*2
+			height = o.unitheight+o.unitborder*2
 		else
-			width = o.unitwidth
-			height = o.unitheight
+			width = o.unitwidth+o.unitborder*2
+			height = o.unitheight+o.unitborder*2
 		end
 		f:SetWidth(width)
 		f:SetHeight(height)
-		f:SetBackdrop({bgFile = "Interface\\Buttons\\WHITE8X8", tile = true, tileSize = 16})
+		-- f:SetBackdrop({bgFile = "Interface\\Buttons\\WHITE8X8", tile = true, tileSize = 16})
+
+		local backdrop = {
+			bgFile = "Interface\\Buttons\\WHITE8X8", tile = true, tileSize = 0,
+			edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = o.unitborder/2,
+			insets = {left = 1, right = 1, top = 1, bottom = 1},
+		}
+
 		f:SetBackdropColor(unpack(o.unitbgcolor))
 
-		if o.borderartwork then
-			f.border:SetWidth(width+o.unitborder) -- the way edgefile works is it basically sits on the center of the edge of the frame and expands both inward and outward. So to compensate asthetically for that I ahve to increase the size of my frame double the desired width of the edgefile/border
-			f.border:SetHeight(height+o.unitborder)
-			f.border:SetBackdrop({edgeFile = "Interface\\AddOns\\NotGrid\\media\\borderartwork", edgeSize = 16})
-		else
-			f.border:SetWidth(width+o.unitborder*2) -- the way edgefile works is it basically sits on the center of the edge of the frame and expands both inward and outward. So to compensate asthetically for that I ahve to increase the size of my frame double the desired width of the edgefile/border
-			f.border:SetHeight(height+o.unitborder*2)
-			f.border:SetBackdrop({edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = o.unitborder})
-		end
-		f.border:SetBackdropBorderColor(unpack(o.unitbordercolor))
-		f.border:SetPoint("CENTER",0,0)
-		f.border:SetFrameLevel(f:GetFrameLevel() + 2)
-		f.border.middleart:SetTexture("Interface/TargetingFrame/UI-TargetingFrame")
+		f:SetBackdrop(backdrop)
+		f:SetBackdropColor(0, 0, 0, 1)
+
+		-- if o.borderartwork then
+		-- 	f.border:SetWidth(width+o.unitborder) -- the way edgefile works is it basically sits on the center of the edge of the frame and expands both inward and outward. So to compensate asthetically for that I ahve to increase the size of my frame double the desired width of the edgefile/border
+		-- 	f.border:SetHeight(height+o.unitborder)
+		-- 	f.border:SetBackdrop({edgeFile = "Interface\\AddOns\\NotGrid\\media\\borderartwork", edgeSize = 16})
+		-- else
+		-- 	f.border:SetWidth(width+o.unitborder*2) -- the way edgefile works is it basically sits on the center of the edge of the frame and expands both inward and outward. So to compensate asthetically for that I ahve to increase the size of my frame double the desired width of the edgefile/border
+		-- 	f.border:SetHeight(height+o.unitborder*2)
+		-- 	f.border:SetBackdrop({edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = o.unitborder})
+		-- end
+		-- f.border:SetBackdropBorderColor(unpack(o.unitbordercolor))
+		-- f.border:SetPoint("CENTER",0,0)
+		-- f.border:SetFrameLevel(f:GetFrameLevel() + 2)
+		-- f.border.middleart:SetTexture("Interface/TargetingFrame/UI-TargetingFrame")
+		f.border:Hide()
+		f.middleart = f.border.middleart
+		f.border = f
+
 		if o.powerposition <= 2 then
 			f.border.middleart:SetTexCoord((58/256)+(1/256/2), (82/256)+(1/256/2), (39/128)+(1/128/2), (44/128)+(1/128/2))
 			f.border.middleart:SetVertexColor(unpack(o.unitbordercolor))
@@ -219,6 +233,7 @@ function NotGrid:ConfigUnitFrames() -- this can get called on every setting chan
 			f.border.middleart:SetVertexColor(unpack(o.unitbordercolor))
 		end
 
+		local texture = [[Interface\AddOns\NotGrid\media\GridGradient]]
 
 		f.healthbar:SetWidth(o.unitwidth)
 		f.healthbar:SetHeight(o.unitheight)
@@ -228,10 +243,30 @@ function NotGrid:ConfigUnitFrames() -- this can get called on every setting chan
 			f.healthbar:SetOrientation("HORIZONTAL")
 		end
 		f.healthbar:SetStatusBarTexture(o.unithealthbartexture)
+		f.healthbar:SetStatusBarTexture(texture)
 		f.healthbar:SetStatusBarColor(unpack(o.unithealthbarcolor))
 		f.healthbar.bgtex:SetTexture(o.unithealthbarbgtexture)
+		f.healthbar.bgtex:SetTexture(texture)
 		f.healthbar.bgtex:SetVertexColor(unpack(o.unithealthbarbgcolor))
 		f.healthbar.bgtex:SetAllPoints()
+
+		f.healthbar.SetColor = function(self, r,g,b)
+			self:SetStatusBarColor(0,0,0,0.8)
+			self.bgtex:SetVertexColor(r,g,b,1)
+
+			-- self:SetStatusBarColor(0,0,0,0)
+			-- self.bgtex:SetVertexColor(r,g,b,0)
+			-- self.text:SetTextColor(r,g,b)
+		end
+		f.powerbar.InvertedSetColor = function(self, r,g,b) -- inverted
+			self:SetStatusBarColor(0,0,0,0.8)
+			self.bgtex:SetVertexColor(r,g,b,1)
+		end
+
+		f.powerbar.SetColor = function(self, r,g,b) -- normal
+			self:SetStatusBarColor(r,g,b,1)
+			self.bgtex:SetVertexColor(r,g,b,0.2)
+		end
 
 
 		-- raid target icon
@@ -250,12 +285,12 @@ function NotGrid:ConfigUnitFrames() -- this can get called on every setting chan
 		if o.showpowerbar then
 			if o.powerposition <= 2 then -- power on top
 				if o.powerposition == 1 then
-					f.healthbar:SetPoint("BOTTOM",0,0)
-					f.powerbar:SetPoint("TOP",0,0)
+					f.healthbar:SetPoint("BOTTOM",0,o.unitborder)
+					f.powerbar:SetPoint("TOP",0,-o.unitborder)
 					f.border.middleart:SetPoint("BOTTOM", f.powerbar, 0, -4)
 				else
-					f.healthbar:SetPoint("TOP",0,0)
-					f.powerbar:SetPoint("BOTTOM",0,0)
+					f.healthbar:SetPoint("TOP",0,-o.unitborder)
+					f.powerbar:SetPoint("BOTTOM",0,o.unitborder)
 					f.border.middleart:SetPoint("TOP", f.powerbar, 0, 4)
 				end
 				f.powerbar:SetWidth(o.unitwidth)
@@ -265,12 +300,12 @@ function NotGrid:ConfigUnitFrames() -- this can get called on every setting chan
 				f.border.middleart:SetHeight(6)
 			elseif o.powerposition >= 3 then
 				if o.powerposition == 3 then
-					f.healthbar:SetPoint("LEFT",0,0)
-					f.powerbar:SetPoint("RIGHT",0,0)
+					f.healthbar:SetPoint("LEFT",o.unitborder,0)
+					f.powerbar:SetPoint("RIGHT",-o.unitborder,0)
 					f.border.middleart:SetPoint("LEFT", f.powerbar, -4, 0)
 				else
-					f.healthbar:SetPoint("RIGHT",0,0)
-					f.powerbar:SetPoint("LEFT",0,0)
+					f.healthbar:SetPoint("RIGHT",-o.unitborder,0)
+					f.powerbar:SetPoint("LEFT",o.unitborder,0)
 					f.border.middleart:SetPoint("RIGHT", f.powerbar, 4, 0)
 				end
 				f.powerbar:SetWidth(o.powersize)
@@ -280,6 +315,7 @@ function NotGrid:ConfigUnitFrames() -- this can get called on every setting chan
 				f.border.middleart:SetHeight(height)
 			end
 			f.powerbar:Show()
+			f.powerbar.bgtex:Show()
 			if o.borderartwork then
 				f.border.middleart:Show()
 			else
@@ -303,7 +339,7 @@ function NotGrid:ConfigUnitFrames() -- this can get called on every setting chan
 		f.incres.bgtex:SetTexture("Interface\\AddOns\\NotGrid\\media\\res")
 		f.incres.bgtex:SetAllPoints()
 		f.incres:Hide()
-		
+
 		f.mindcontrolled:SetWidth(o.unitheight) -- yep, so it stays square under most common sizes. Think of a mathematical way in the future
 		f.mindcontrolled:SetHeight(o.unitheight)
 		f.mindcontrolled:ClearAllPoints()
@@ -348,14 +384,14 @@ function NotGrid:ConfigUnitFrames() -- this can get called on every setting chan
 			fi:ClearAllPoints()
 			-- If tracking icon is Buff Icon 1, use the 9th position from the array (BOTTOM) and move it 10 pixels left on the X axis
 			if i == 9 then
-				-- this should be changed from -10 (static) to a dynamic value that represents the chosen icon size		
+				-- this should be changed from -10 (static) to a dynamic value that represents the chosen icon size
 				fi:SetPoint(point,-10,0)
 			elseif i == 10 then
-				-- this should be changed from -10 (static) to a dynamic value that represents the chosen icon size		
+				-- this should be changed from -10 (static) to a dynamic value that represents the chosen icon size
 				fi:SetPoint(point,0,0)
 			elseif i == 11 then
-				-- this should be changed from -10 (static) to a dynamic value that represents the chosen icon size		
-				fi:SetPoint(point,10,0)	
+				-- this should be changed from -10 (static) to a dynamic value that represents the chosen icon size
+				fi:SetPoint(point,10,0)
 			else
 				fi:SetPoint(point,0,0)
 			end
@@ -385,7 +421,7 @@ function NotGrid:PositionFrames()
 		else
 			powermodx = o.powersize+1
 		end
-	end	
+	end
 
 	--handle all the unitframes and subgroups
 	for i=1,10 do -- 1-8 is raid, 9 is party, 10 is partypet

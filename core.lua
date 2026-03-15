@@ -168,23 +168,27 @@ function NotGrid:UNIT_MAIN(unitid)
 			color = {r=1,g=0,b=1}
 		end
 
+
 		--update some stuff
 		f.name = name
 		--handle coloring text
 		if o.colorunithealthbarbyclass then
-			f.healthbar:SetStatusBarColor(color.r, color.g, color.b, o.unithealthbarcolor[4])
+			f.healthbar:SetColor(color.r, color.g, color.b)
 		end
 		if o.colorunitnamehealthbyclass then
 			f.namehealthtext:SetTextColor(color.r, color.g, color.b, o.unitnamehealthtextcolor[4])
 		end
-		if o.colorunithealthbarbgbyclass then
-			f.healthbar.bgtex:SetVertexColor(color.r, color.g, color.b)
+
+		if powertype == 0 then
+			-- f.powerbar:InvertedSetColor(pcolor.r, pcolor.g, pcolor.b)
+			f.powerbar:InvertedSetColor(0.4, 0.4, 1)
+		else
+			f.powerbar:SetColor(pcolor.r, pcolor.g, pcolor.b)
 		end
 
-		f.powerbar:SetStatusBarColor(pcolor.r, pcolor.g, pcolor.b)
-		if o.colorpowerbarbgbytype then
-			f.powerbar.bgtex:SetVertexColor(pcolor.r, pcolor.g, pcolor.b)
-		end
+		-- if o.colorpowerbarbgbytype then
+		-- 	f.powerbar.bgtex:SetVertexColor(pcolor.r, pcolor.g, pcolor.b)
+		-- end
 
 		-- Set role icon
 		local role = self:GetPlayerRole(unitid)
@@ -275,12 +279,13 @@ function NotGrid:UNIT_MAIN(unitid)
 			--if UnitCanAttack("player", unitid) and HasFullControl() then -- Target is mind controlled HasFulLControl ensures that if we're mind controlled all other frames are not shown as MC.
 				--print("Unit is Mind Controlled?")
 				if o.colorunithealthbarbyclass then
-					f.healthbar:SetStatusBarColor(0.64, 0.19, 0.79, o.unithealthbarcolor[4])
+					f.healthbar:SetColor(0.64, 0.19, 0.79)
+					-- f.healthbar:SetStatusBarColor(0.64, 0.19, 0.79, o.unithealthbarcolor[4])
 				end
 				f.mindcontrolled:Show()
 			else
 				if o.colorunithealthbarbyclass then
-					f.healthbar:SetStatusBarColor(color.r, color.g, color.b, o.unithealthbarcolor[4])
+					f.healthbar:SetColor(color.r, color.g, color.b)
 				end
 				f.mindcontrolled:Hide()
 			end
@@ -330,7 +335,8 @@ function NotGrid:SetIncHealFrame(f, healamount, currhealth, maxhealth) -- well t
 		f.incheal:SetPoint("LEFT",currwidth,0)
 	end
 	local color = o.unithealcommbarcolor
-	f.incheal:SetBackdropColor(color[1],color[2],color[3],color[4]) -- instead of hide/show I set opacity. Note that I can't use SetAlpha cause it will hide the child elements
+	-- f.incheal:SetBackdropColor(color[1],color[2],color[3],color[4]) -- instead of hide/show I set opacity. Note that I can't use SetAlpha cause it will hide the child elements
+	f.incheal:SetBackdropColor(0,0,0,0.4)
 end
 
 ---------------
@@ -372,7 +378,7 @@ function NotGrid:UNIT_AURA(unitid)
 
         for i=1,11 do -- Changed from 8 to 11 as we've added Buff Icon 1,2 and 3 (9th, 10th, 11th Icon)
             local f = f.healthbar["trackingicon"..i]
-            
+
             -- Hide icons 9, 10, 11 during combat
             if self.inCombat and (i == 9 or i == 10 or i == 11) then
                 f:Hide()
@@ -424,7 +430,8 @@ function NotGrid:UNIT_BORDER(unitid)
 			f.border:SetBackdropBorderColor(unpack(o.manawarningcolor))
 			f.border.middleart:SetVertexColor(unpack(o.manawarningcolor))
 		else
-			f.border:SetBackdropBorderColor(unpack(o.unitbordercolor))
+			-- f.border:SetBackdropBorderColor(unpack(o.unitbordercolor))
+			f.border:SetBackdropBorderColor(0,0,0,0)
 			f.border.middleart:SetVertexColor(unpack(o.unitbordercolor))
 		end
 	end
@@ -589,7 +596,7 @@ function NotGrid:HealCommHandler(name)
 			end
 		end
 	end
-	
+
 	if unitid then
 		self:UNIT_MAIN(unitid)
 		if self.IdenticalUnits[unitid] then
@@ -673,7 +680,7 @@ function NotGrid:PLAYER_ENTERING_WORLD() -- when they login,reloadui,or zone in/
 	end
 	self:UpdateProximityMapVars() -- zoning into an instance won't trigger a zonechange event if the outdoors name is the same name as the indoors. This ensures the vars update.
 	self:BlizzFrameHandler()
-	
+
 	-- Update all raid units
 	if GetNumRaidMembers() > 0 then
 		for i=1,40 do
@@ -700,7 +707,7 @@ function NotGrid:GetPlayerRole(unitId)
 	local role = "DPS" -- Default role
 	local _, unitClass = UnitClass(unitId)
 	local name = UnitName(unitId)
-	
+
 	-- Check if warrior/paladin has aggro or druid is in bear form with aggro
 	if ((unitClass == "WARRIOR" or unitClass == "PALADIN") and self.Banzai:GetUnitAggroByUnitId(unitId)) or
 	   (unitClass == "DRUID" and self:HasBuff(unitId, "Dire Bear Form") and self.Banzai:GetUnitAggroByUnitId(unitId)) then
@@ -708,7 +715,7 @@ function NotGrid:GetPlayerRole(unitId)
 	-- Check if player is healing
 	else
 		local isHealing = false
-		
+
 		-- Check single target heals
 		for target, healers in pairs(self.HealComm.Heals) do
 			for healer, info in pairs(healers) do
@@ -719,7 +726,7 @@ function NotGrid:GetPlayerRole(unitId)
 			end
 			if isHealing then break end
 		end
-		
+
 		-- Check group heals
 		if not isHealing then
 			for caster, healInfo in pairs(self.HealComm.GrpHeals) do
@@ -729,12 +736,12 @@ function NotGrid:GetPlayerRole(unitId)
 				end
 			end
 		end
-		
+
 		if isHealing then
 			role = "HEALER"
 		end
 	end
-	
+
 	return role
 end
 
@@ -742,15 +749,15 @@ function NotGrid:HasBuff(unitId, buffName)
 	local i = 1
 	while true do
 		if not UnitBuff(unitId, i) then break end
-		
+
 		self.Gratuity:SetUnitBuff(unitId, i)
 		local buff = self.Gratuity:GetLine(1)
 		if not buff then break end
-		
+
 		if buff == buffName then
 			return true
 		end
-		
+
 		i = i + 1
 	end
 	return false
