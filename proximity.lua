@@ -41,15 +41,15 @@ end
 ----------------
 -- Main Check --
 ----------------
-
+local xp3 = pcall(UnitXP, "nop", "nop");
 function NotGrid:CheckProximity(unitid) -- return 1=confirmed_true, 2=confirmed_false, and no_response/false/nil means we can't confirm either way
 	if UnitExists(unitid) and UnitIsVisible(unitid) then
 		--check these scenarios first even if the player has check with map toggled
 		if UnitIsUnit(unitid, "player") then --unitisplayer, 0 yards
 			return 1
-		elseif UnitXP and not UnitXP("inSight", "player", unitid) then -- use UnitXP to check if unit is in sight
+		elseif xp3 and not UnitXP("inSight", "player", unitid) then -- use UnitXP to check if unit is in sight
 			return 2
-		elseif UnitXP and UnitXP("distanceBetween", "player", unitid) <= 40 then
+		elseif xp3 and UnitXP("distanceBetween", "player", unitid) <= 40 then
 			return 1
 		elseif CheckInteractDistance(unitid, 3) then -- duel range, 10 yards
 			return 1
@@ -115,7 +115,7 @@ function NotGrid:CombatEventHandle()
 		local v = self.ProximityVars
 		local capturestring = L.CombatEvents[event] -- "event" is the name of the event sent by the wow api
 		local _, _, name = string.find(arg1, capturestring) -- arg1 gets sent by any combat event as the string you see in combat log, this will grab the name out of it using defined capture strings in localization.lua
-		
+
 		for _,f in self.UnitFrames do --look through unitframes for f.name?
 			if (name and f.name) and (name == f.name) then
 				self:RangeToggle(f, 1)
@@ -169,7 +169,7 @@ end
 ------------------------------------------------
 -- Notes About Combat Log Messages
 ------------------------------------------------
-None of the below can be used for accurate proximity assumptions. 
+None of the below can be used for accurate proximity assumptions.
 Here's why: Combat events are limited to the likes of "(%a+) hits". There's no "(%a+) gets hit". What does this mean? Lets look at a Ragnaros encounter for an example.
 
 Player -- 0 yards
